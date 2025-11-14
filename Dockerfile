@@ -99,11 +99,7 @@ COPY src/restore_snapshot.sh /restore_snapshot.sh
 RUN chmod +x /restore_snapshot.sh && \
     /restore_snapshot.sh || echo "Warning: Snapshot restoration failed, continuing anyway..."
 
-# ============================================================================
-# Add model validation script
-# ============================================================================
-COPY src/check_models.sh /usr/local/bin/check-models
-RUN chmod +x /usr/local/bin/check-models
+
 
 # Set the default command to run when starting the container
 CMD ["/start.sh"]
