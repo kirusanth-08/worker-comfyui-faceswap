@@ -4,6 +4,23 @@
 TCMALLOC="$(ldconfig -p | grep -Po "libtcmalloc.so.\d" | head -n 1)"
 export LD_PRELOAD="${TCMALLOC}"
 
+echo "======================================================================"
+echo "worker-comfyui-faceswap: Container Starting"
+echo "======================================================================"
+
+# Run model validation checks
+echo ""
+if ! check-models; then
+    echo ""
+    echo "Model validation failed. Please check the errors above."
+    echo "If you want to skip model validation (not recommended), set:"
+    echo "  SKIP_MODEL_CHECK=true"
+    exit 1
+fi
+
+echo ""
+echo "----------------------------------------------------------------------"
+
 # Ensure ComfyUI-Manager runs in offline network mode inside the container
 comfy-manager-set-mode offline || echo "worker-comfyui - Could not set ComfyUI-Manager network_mode" >&2
 

@@ -88,6 +88,23 @@ ENV PIP_NO_INPUT=1
 COPY scripts/comfy-manager-set-mode.sh /usr/local/bin/comfy-manager-set-mode
 RUN chmod +x /usr/local/bin/comfy-manager-set-mode
 
+# ============================================================================
+# Install custom nodes from snapshot
+# ============================================================================
+# Copy the snapshot file to the root directory
+COPY snapshot-faceswap.json /snapshot-faceswap.json
+
+# Copy and execute the restore snapshot script
+COPY src/restore_snapshot.sh /restore_snapshot.sh
+RUN chmod +x /restore_snapshot.sh && \
+    /restore_snapshot.sh || echo "Warning: Snapshot restoration failed, continuing anyway..."
+
+# ============================================================================
+# Add model validation script
+# ============================================================================
+COPY src/check_models.sh /usr/local/bin/check-models
+RUN chmod +x /usr/local/bin/check-models
+
 # Set the default command to run when starting the container
 CMD ["/start.sh"]
 
