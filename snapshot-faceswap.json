@@ -4,6 +4,10 @@
         "https://github.com/ClownsharkBatwing/RES4LYF": {
             "hash": "46de917234f9fef3f2ab411c41e07aa3c633f4f7",
             "disabled": false
+        }, 
+        "https://github.com/kijai/ComfyUI-KJNodes.git": {
+            "hash": "9d7af919b91838fb22e31ad0107a6ddcf8bd7f3f",
+            "disabled": false
         }
     },
     "cnr_custom_nodes": {
