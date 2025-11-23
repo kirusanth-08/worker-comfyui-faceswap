@@ -1,322 +1,321 @@
 {
   "input": {
     "workflow": {
-  "335": {
-    "inputs": {
-      "strength": 0.97,
-      "model": [
-        "339",
-        0
-      ]
+      "335": {
+        "inputs": {
+          "strength": 0.97,
+          "model": [
+            "339",
+            0
+          ]
+        },
+        "class_type": "CFGNorm",
+        "_meta": {
+          "title": "CFGNorm"
+        }
+      },
+      "336": {
+        "inputs": {
+          "samples": [
+            "395",
+            0
+          ],
+          "vae": [
+            "337",
+            0
+          ]
+        },
+        "class_type": "VAEDecode",
+        "_meta": {
+          "title": "VAE Decode"
+        }
+      },
+      "337": {
+        "inputs": {
+          "vae_name": "qwen_image_vae.safetensors"
+        },
+        "class_type": "VAELoader",
+        "_meta": {
+          "title": "Load VAE"
+        }
+      },
+      "338": {
+        "inputs": {
+          "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+          "type": "qwen_image",
+          "device": "default"
+        },
+        "class_type": "CLIPLoader",
+        "_meta": {
+          "title": "Load CLIP"
+        }
+      },
+      "339": {
+        "inputs": {
+          "shift": 3,
+          "model": [
+            "394",
+            0
+          ]
+        },
+        "class_type": "ModelSamplingAuraFlow",
+        "_meta": {
+          "title": "ModelSamplingAuraFlow"
+        }
+      },
+      "343": {
+        "inputs": {
+          "image": "1.jpg"
+        },
+        "class_type": "LoadImage",
+        "_meta": {
+          "title": "Body Reference"
+        }
+      },
+      "345": {
+        "inputs": {
+          "width": [
+            "406",
+            1
+          ],
+          "height": [
+            "406",
+            2
+          ],
+          "batch_size": 1
+        },
+        "class_type": "EmptySD3LatentImage",
+        "_meta": {
+          "title": "EmptySD3LatentImage"
+        }
+      },
+      "348": {
+        "inputs": {
+          "prompt": "head_swap: start with Picture 1 as the base image, keeping its lighting, environment, and background. remove the head from Picture 1 completely and replace it with the head from Picture 2. ensure the head and body have correct anatomical proportions, and blend the skin tones, shadows, and lighting naturally so the final result appears as one coherent, realistic person.",
+          "clip": [
+            "338",
+            0
+          ],
+          "vae": [
+            "337",
+            0
+          ],
+          "image1": [
+            "406",
+            0
+          ],
+          "image2": [
+            "405",
+            0
+          ]
+        },
+        "class_type": "TextEncodeQwenImageEditPlus",
+        "_meta": {
+          "title": "TextEncodeQwenImageEditPlus"
+        }
+      },
+      "349": {
+        "inputs": {
+          "image": "2.jpg"
+        },
+        "class_type": "LoadImage",
+        "_meta": {
+          "title": "Face Reference"
+        }
+      },
+      "375": {
+        "inputs": {
+          "pixels": [
+            "405",
+            0
+          ],
+          "vae": [
+            "337",
+            0
+          ]
+        },
+        "class_type": "VAEEncode",
+        "_meta": {
+          "title": "VAE Encode"
+        }
+      },
+      "392": {
+        "inputs": {
+          "pixels": [
+            "406",
+            0
+          ],
+          "vae": [
+            "337",
+            0
+          ]
+        },
+        "class_type": "VAEEncode",
+        "_meta": {
+          "title": "VAE Encode"
+        }
+      },
+      "393": {
+        "inputs": {
+          "conditioning": [
+            "348",
+            0
+          ]
+        },
+        "class_type": "ConditioningZeroOut",
+        "_meta": {
+          "title": "ConditioningZeroOut"
+        }
+      },
+      "394": {
+        "inputs": {
+          "lora_name": "bfs_head_v3_qwen_image_edit_2509.safetensors",
+          "strength_model": 1,
+          "model": [
+            "404",
+            0
+          ]
+        },
+        "class_type": "LoraLoaderModelOnly",
+        "_meta": {
+          "title": "LoraLoaderModelOnly"
+        }
+      },
+      "395": {
+        "inputs": {
+          "add_noise": true,
+          "noise_seed": 232011390563975,
+          "cfg": 2.5,
+          "model": [
+            "335",
+            0
+          ],
+          "positive": [
+            "348",
+            0
+          ],
+          "negative": [
+            "393",
+            0
+          ],
+          "sampler": [
+            "398",
+            0
+          ],
+          "sigmas": [
+            "396",
+            0
+          ],
+          "latent_image": [
+            "345",
+            0
+          ]
+        },
+        "class_type": "SamplerCustom",
+        "_meta": {
+          "title": "SamplerCustom"
+        }
+      },
+      "396": {
+        "inputs": {
+          "power": 1,
+          "sigmas": [
+            "397",
+            0
+          ]
+        },
+        "class_type": "Sigmas Power",
+        "_meta": {
+          "title": "Sigmas Power"
+        }
+      },
+      "397": {
+        "inputs": {
+          "scheduler": "beta57",
+          "steps": 20,
+          "denoise": 1,
+          "model": [
+            "335",
+            0
+          ]
+        },
+        "class_type": "BasicScheduler",
+        "_meta": {
+          "title": "BasicScheduler"
+        }
+      },
+      "398": {
+        "inputs": {
+          "sampler_name": "res_2s"
+        },
+        "class_type": "KSamplerSelect",
+        "_meta": {
+          "title": "KSamplerSelect"
+        }
+      },
+      "404": {
+        "inputs": {
+          "unet_name": "Qwen-Image-Edit-2509-Q8_0.gguf"
+        },
+        "class_type": "UnetLoaderGGUF",
+        "_meta": {
+          "title": "Unet Loader (GGUF)"
+        }
+      },
+      "405": {
+        "inputs": {
+          "width": 1328,
+          "height": 1328,
+          "upscale_method": "lanczos",
+          "keep_proportion": "resize",
+          "pad_color": "0, 0, 0",
+          "crop_position": "center",
+          "divisible_by": 2,
+          "device": "cpu",
+          "image": [
+            "349",
+            0
+          ]
+        },
+        "class_type": "ImageResizeKJv2",
+        "_meta": {
+          "title": "Resize Image v2"
+        }
+      },
+      "406": {
+        "inputs": {
+          "width": 1328,
+          "height": 1328,
+          "upscale_method": "lanczos",
+          "keep_proportion": "resize",
+          "pad_color": "0, 0, 0",
+          "crop_position": "center",
+          "divisible_by": 2,
+          "device": "cpu",
+          "image": [
+            "343",
+            0
+          ]
+        },
+        "class_type": "ImageResizeKJv2",
+        "_meta": {
+          "title": "Resize Image v2"
+        }
+      },
+      "416": {
+        "inputs": {
+          "filename_prefix": "ComfyUI",
+          "images": [
+            "336",
+            0
+          ]
+        },
+        "class_type": "SaveImage",
+        "_meta": {
+          "title": "Save Image"
+        }
+      }
     },
-    "class_type": "CFGNorm",
-    "_meta": {
-      "title": "CFGNorm"
-    }
-  },
-  "336": {
-    "inputs": {
-      "samples": [
-        "395",
-        0
-      ],
-      "vae": [
-        "337",
-        0
-      ]
-    },
-    "class_type": "VAEDecode",
-    "_meta": {
-      "title": "VAE Decode"
-    }
-  },
-  "337": {
-    "inputs": {
-      "vae_name": "qwen_image_vae.safetensors"
-    },
-    "class_type": "VAELoader",
-    "_meta": {
-      "title": "Load VAE"
-    }
-  },
-  "338": {
-    "inputs": {
-      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
-      "type": "qwen_image",
-      "device": "default"
-    },
-    "class_type": "CLIPLoader",
-    "_meta": {
-      "title": "Load CLIP"
-    }
-  },
-  "339": {
-    "inputs": {
-      "shift": 3,
-      "model": [
-        "394",
-        0
-      ]
-    },
-    "class_type": "ModelSamplingAuraFlow",
-    "_meta": {
-      "title": "ModelSamplingAuraFlow"
-    }
-  },
-  "343": {
-    "inputs": {
-      "image": "1.jpg"
-    },
-    "class_type": "LoadImage",
-    "_meta": {
-      "title": "Body Reference"
-    }
-  },
-  "345": {
-    "inputs": {
-      "width": [
-        "406",
-        1
-      ],
-      "height": [
-        "406",
-        2
-      ],
-      "batch_size": 1
-    },
-    "class_type": "EmptySD3LatentImage",
-    "_meta": {
-      "title": "EmptySD3LatentImage"
-    }
-  },
-  "348": {
-    "inputs": {
-      "prompt": "head_swap: start with Picture 1 as the base image, keeping its lighting, environment, and background. remove the head from Picture 1 completely and replace it with the head from Picture 2. ensure the head and body have correct anatomical proportions, and blend the skin tones, shadows, and lighting naturally so the final result appears as one coherent, realistic person.",
-      "clip": [
-        "338",
-        0
-      ],
-      "vae": [
-        "337",
-        0
-      ],
-      "image1": [
-        "406",
-        0
-      ],
-      "image2": [
-        "405",
-        0
-      ]
-    },
-    "class_type": "TextEncodeQwenImageEditPlus",
-    "_meta": {
-      "title": "TextEncodeQwenImageEditPlus"
-    }
-  },
-  "349": {
-    "inputs": {
-      "image": "2.jpg"
-    },
-    "class_type": "LoadImage",
-    "_meta": {
-      "title": "Face Reference"
-    }
-  },
-  "375": {
-    "inputs": {
-      "pixels": [
-        "405",
-        0
-      ],
-      "vae": [
-        "337",
-        0
-      ]
-    },
-    "class_type": "VAEEncode",
-    "_meta": {
-      "title": "VAE Encode"
-    }
-  },
-  "392": {
-    "inputs": {
-      "pixels": [
-        "406",
-        0
-      ],
-      "vae": [
-        "337",
-        0
-      ]
-    },
-    "class_type": "VAEEncode",
-    "_meta": {
-      "title": "VAE Encode"
-    }
-  },
-  "393": {
-    "inputs": {
-      "conditioning": [
-        "348",
-        0
-      ]
-    },
-    "class_type": "ConditioningZeroOut",
-    "_meta": {
-      "title": "ConditioningZeroOut"
-    }
-  },
-  "394": {
-    "inputs": {
-      "lora_name": "bfs_head_v3_qwen_image_edit_2509.safetensors",
-      "strength_model": 1,
-      "model": [
-        "404",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "LoraLoaderModelOnly"
-    }
-  },
-  "395": {
-    "inputs": {
-      "add_noise": true,
-      "noise_seed": 232011390563975,
-      "cfg": 2.5,
-      "model": [
-        "335",
-        0
-      ],
-      "positive": [
-        "348",
-        0
-      ],
-      "negative": [
-        "393",
-        0
-      ],
-      "sampler": [
-        "398",
-        0
-      ],
-      "sigmas": [
-        "396",
-        0
-      ],
-      "latent_image": [
-        "345",
-        0
-      ]
-    },
-    "class_type": "SamplerCustom",
-    "_meta": {
-      "title": "SamplerCustom"
-    }
-  },
-  "396": {
-    "inputs": {
-      "power": 1,
-      "sigmas": [
-        "397",
-        0
-      ]
-    },
-    "class_type": "Sigmas Power",
-    "_meta": {
-      "title": "Sigmas Power"
-    }
-  },
-  "397": {
-    "inputs": {
-      "scheduler": "beta57",
-      "steps": 20,
-      "denoise": 1,
-      "model": [
-        "335",
-        0
-      ]
-    },
-    "class_type": "BasicScheduler",
-    "_meta": {
-      "title": "BasicScheduler"
-    }
-  },
-  "398": {
-    "inputs": {
-      "sampler_name": "res_2s"
-    },
-    "class_type": "KSamplerSelect",
-    "_meta": {
-      "title": "KSamplerSelect"
-    }
-  },
-  "404": {
-    "inputs": {
-      "unet_name": "Qwen-Image-Edit-2509-Q8_0.gguf"
-    },
-    "class_type": "UnetLoaderGGUF",
-    "_meta": {
-      "title": "Unet Loader (GGUF)"
-    }
-  },
-  "405": {
-    "inputs": {
-      "width": 1328,
-      "height": 1328,
-      "upscale_method": "lanczos",
-      "keep_proportion": "resize",
-      "pad_color": "0, 0, 0",
-      "crop_position": "center",
-      "divisible_by": 2,
-      "device": "cpu",
-      "image": [
-        "349",
-        0
-      ]
-    },
-    "class_type": "ImageResizeKJv2",
-    "_meta": {
-      "title": "Resize Image v2"
-    }
-  },
-  "406": {
-    "inputs": {
-      "width": 1328,
-      "height": 1328,
-      "upscale_method": "lanczos",
-      "keep_proportion": "resize",
-      "pad_color": "0, 0, 0",
-      "crop_position": "center",
-      "divisible_by": 2,
-      "device": "cpu",
-      "image": [
-        "343",
-        0
-      ]
-    },
-    "class_type": "ImageResizeKJv2",
-    "_meta": {
-      "title": "Resize Image v2"
-    }
-  },
-  "416": {
-    "inputs": {
-      "filename_prefix": "ComfyUI",
-      "images": [
-        "336",
-        0
-      ]
-    },
-    "class_type": "SaveImage",
-    "_meta": {
-      "title": "Save Image"
-    }
-  }
-},
-
     "images": [
       {
         "name": "1.jpg",
