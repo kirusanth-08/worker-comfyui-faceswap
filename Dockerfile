@@ -3,7 +3,8 @@
 # ============================================================================
 
 # Base image with CUDA 12.8 and cuDNN runtime
-FROM nvidia/cuda:12.8.0-cudnn-runtime-ubuntu24.04 AS base
+FROM nvidia/cuda:12.6.0-cudnn-runtime-ubuntu24.04 AS base
+
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -13,8 +14,8 @@ ENV CMAKE_BUILD_PARALLEL_LEVEL=8
 
 # Environment for PyTorch and ComfyUI
 ENV ENABLE_PYTORCH_UPGRADE=true
-ENV PYTORCH_INDEX_URL=https://download.pytorch.org/whl/cu128
-ENV CUDA_VERSION_FOR_COMFY=12.8
+ENV CUDA_VERSION_FOR_COMFY=12.6
+ENV PYTORCH_INDEX_URL=https://download.pytorch.org/whl/cu126
 ENV COMFYUI_VERSION=latest
 ENV PATH="/opt/venv/bin:${PATH}"
 
