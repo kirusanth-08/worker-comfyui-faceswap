@@ -1,91 +1,117 @@
-# ============================================================================
-# Optimized Dockerfile for RTX 5090 with CUDA 12.8 and ComfyUI
-# ============================================================================
+# Build argument for base image selection
+ARG BASE_IMAGE=nvidia/cuda:12.6.3-cudnn-runtime-ubuntu24.04
 
-# Base image with CUDA 12.8 and cuDNN runtime
-FROM nvidia/cuda:12.6.0-cudnn-runtime-ubuntu24.04 AS base
+# Stage 1: Base image with common dependencies
+FROM ${BASE_IMAGE} AS base
 
+# Build arguments for this stage with sensible defaults for standalone builds
+ARG COMFYUI_VERSION=latest
+ARG CUDA_VERSION_FOR_COMFY
+ARG ENABLE_PYTORCH_UPGRADE=false
+ARG PYTORCH_INDEX_URL
 
-# Prevent interactive prompts during package installation
+# Prevents prompts from packages asking for user input during installation
 ENV DEBIAN_FRONTEND=noninteractive
+# Prefer binary wheels over source distributions for faster pip installations
 ENV PIP_PREFER_BINARY=1
+# Ensures output from python is printed immediately to the terminal without buffering
 ENV PYTHONUNBUFFERED=1
+# Speed up some cmake builds
 ENV CMAKE_BUILD_PARALLEL_LEVEL=8
 
-# Environment for PyTorch and ComfyUI
-ENV ENABLE_PYTORCH_UPGRADE=true
-ENV CUDA_VERSION_FOR_COMFY=12.6
-ENV PYTORCH_INDEX_URL=https://download.pytorch.org/whl/cu126
-ENV COMFYUI_VERSION=latest
-ENV PATH="/opt/venv/bin:${PATH}"
-
-# Install system dependencies
+# Install Python, git and other necessary tools
 RUN apt-get update && apt-get install -y \
-    python3.12 python3.12-venv git wget ffmpeg \
-    libgl1 libglib2.0-0 libsm6 libxext6 libxrender1 \
+    python3.12 \
+    python3.12-venv \
+    git \
+    wget \
+    libgl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    ffmpeg \
     && ln -sf /usr/bin/python3.12 /usr/bin/python \
-    && ln -sf /usr/bin/pip3 /usr/bin/pip \
-    && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+    && ln -sf /usr/bin/pip3 /usr/bin/pip
 
-# Install uv and create isolated virtual environment
+# Clean up to reduce image size
+RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+
+# Install uv (latest) using official installer and create isolated venv
 RUN wget -qO- https://astral.sh/uv/install.sh | sh \
     && ln -s /root/.local/bin/uv /usr/local/bin/uv \
     && ln -s /root/.local/bin/uvx /usr/local/bin/uvx \
     && uv venv /opt/venv
 
-# Install comfy-cli and essential Python packages
+# Use the virtual environment for all subsequent commands
+ENV PATH="/opt/venv/bin:${PATH}"
+
+# Install comfy-cli + dependencies needed by it to install ComfyUI
 RUN uv pip install comfy-cli pip setuptools wheel
 
-# Install ComfyUI with specified CUDA version
-RUN /usr/bin/yes | comfy --workspace /comfyui install --version "${COMFYUI_VERSION}" --cuda-version "${CUDA_VERSION_FOR_COMFY}" --nvidia
+# Install ComfyUI
+RUN if [ -n "${CUDA_VERSION_FOR_COMFY}" ]; then \
+      /usr/bin/yes | comfy --workspace /comfyui install --version "${COMFYUI_VERSION}" --cuda-version "${CUDA_VERSION_FOR_COMFY}" --nvidia; \
+    else \
+      /usr/bin/yes | comfy --workspace /comfyui install --version "${COMFYUI_VERSION}" --nvidia; \
+    fi
 
-# Upgrade PyTorch to match CUDA 12.8
-RUN uv pip install --force-reinstall torch torchvision torchaudio --index-url ${PYTORCH_INDEX_URL}
+# Upgrade PyTorch if needed (for newer CUDA versions)
+RUN if [ "$ENABLE_PYTORCH_UPGRADE" = "true" ]; then \
+      uv pip install --force-reinstall torch torchvision torchaudio --index-url ${PYTORCH_INDEX_URL}; \
+    fi
 
-# Set working directory
+# Change working directory to ComfyUI
 WORKDIR /comfyui
 
-# Add network volume support
+# Support for the network volume
 ADD src/extra_model_paths.yaml ./
 
-# Return to root directory
+# Go back to the root
 WORKDIR /
 
-# Install runtime dependencies for the handler
+# Install Python runtime dependencies for the handler
 RUN uv pip install runpod requests websocket-client
 
-# Add main scripts
+# Add application code and scripts
 ADD src/start.sh handler.py test_input.json ./
 RUN chmod +x /start.sh
 
-# Add scripts for custom nodes and manager mode
+# Add script to install custom nodes
 COPY scripts/comfy-node-install.sh /usr/local/bin/comfy-node-install
 RUN chmod +x /usr/local/bin/comfy-node-install
+
+# Prevent pip from asking for confirmation during uninstall steps in custom nodes
+ENV PIP_NO_INPUT=1
+
+# Copy helper script to switch Manager network mode at container start
 COPY scripts/comfy-manager-set-mode.sh /usr/local/bin/comfy-manager-set-mode
 RUN chmod +x /usr/local/bin/comfy-manager-set-mode
 
-# Prevent pip from asking for input during uninstall steps
-ENV PIP_NO_INPUT=1
-
+# ============================================================================
 # Install custom nodes from snapshot
+# ============================================================================
+# Copy the snapshot file to the root directory
 COPY snapshot-faceswap.json /snapshot-faceswap.json
-COPY src/restore_snapshot.sh /restore_snapshot.sh
-RUN chmod +x /restore_snapshot.sh && /restore_snapshot.sh || echo "Warning: Snapshot restoration failed, continuing anyway..."
 
-# Default command
+# Copy and execute the restore snapshot script
+COPY src/restore_snapshot.sh /restore_snapshot.sh
+RUN chmod +x /restore_snapshot.sh && \
+    /restore_snapshot.sh || echo "Warning: Snapshot restoration failed, continuing anyway..."
+
+
+
+# Set the default command to run when starting the container
 CMD ["/start.sh"]
 
-# ============================================================================
-# Stage 2: Downloader (pre-download models to reduce final build time)
-# ============================================================================
+# Stage 2: Download models
 FROM base AS downloader
+
+# Change working directory to ComfyUI
 WORKDIR /comfyui
 
-# Example: pre-download default ComfyUI models (adjust URLs or scripts as needed)
-RUN comfy models install --all
-
-# ============================================================================
 # Stage 3: Final image
-# ============================================================================
 FROM base AS final
+
+# Copy models from stage 2 to the final image
 COPY --from=downloader /comfyui/models /comfyui/models
